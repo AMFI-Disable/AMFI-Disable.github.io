@@ -37,14 +37,11 @@ export interface SocialLink {
 
 export const HUB_CONFIG = {
   brand: "AMFI-Disable",
-  name: "Even",
-  role: "Software Engineer & Systems Builder",
-  location: "Earth · UTC+8", // Replace with your city/timezone
-  availability: "Open to interesting builds & collaborations",
+  role: "Open-Source Software & Systems Hub",
+  availability: "Active Open-Source Repositories",
   headline: "Local-first macOS apps, browser games, and sharp developer tools.",
-  bio: "I design and ship native SwiftUI utilities, zero-backend WebGL/WebRTC browser games, Manifest V3 extensions, and fast Python CLI workstations—with zero telemetry and clean interfaces.",
+  bio: "Repository hub for AMFI-Disable—native SwiftUI utilities, zero-backend WebGL/WebRTC browser games, Manifest V3 extensions, and Python CLI workstations.",
   githubUrl: "https://github.com/AMFI-Disable",
-  email: "hello@example.com", // Replace with your preferred contact email
   brewTapCmd: "brew tap AMFI-Disable/tap",
   brewInstalls: [
     { label: "Juicer (macOS Suite)", cmd: "brew install --cask juicer" },

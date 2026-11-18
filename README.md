@@ -47,7 +47,7 @@ npm run preview
 ## Customizing Your Content
 
 1. Open `src/data/hub.ts` and edit `HUB_CONFIG`:
-   - Update `name`, `role`, `location`, `availability`, `headline`, `bio`, and `email`.
+   - Update `brand`, `role`, `availability`, `headline`, and `bio`.
    - Add, remove, or reorder entries in `projects`, `principles`, `stack`, and `links`.
 2. Update `<title>` and `<meta>` tags in `index.html` if you change your site title or domain.
 

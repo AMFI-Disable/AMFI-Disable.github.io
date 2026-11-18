@@ -319,22 +319,18 @@ function renderApp(): void {
       <section id="contact" class="section">
         <div class="section-header">
           <div>
-            <h2 class="section-title">Connect & Links</h2>
-            <p class="section-subtitle">${escapeHtml(HUB_CONFIG.location)} · ${escapeHtml(HUB_CONFIG.role)}</p>
+            <h2 class="section-title">Repositories & Links</h2>
+            <p class="section-subtitle">${escapeHtml(HUB_CONFIG.role)}</p>
           </div>
         </div>
         <div class="contact-grid">
           ${linksHtml}
-          <a class="contact-card" href="mailto:${escapeHtml(HUB_CONFIG.email)}">
-            <span class="contact-label">Email</span>
-            <span class="contact-detail">${escapeHtml(HUB_CONFIG.email)}</span>
-          </a>
         </div>
       </section>
     </main>
 
     <footer class="container site-footer">
-      <span>&copy; ${new Date().getFullYear()} ${escapeHtml(HUB_CONFIG.brand)} (${escapeHtml(HUB_CONFIG.name)}). MIT Licensed.</span>
+      <span>&copy; ${new Date().getFullYear()} ${escapeHtml(HUB_CONFIG.brand)}. MIT Licensed.</span>
       <span>Built with Vite & TypeScript · Hosted on GitHub Pages</span>
     </footer>
 
