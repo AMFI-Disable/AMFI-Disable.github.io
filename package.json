@@ -1,0 +1,16 @@
+{
+  "name": "amfi-disable.github.io",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal developer hub and portfolio for AMFI-Disable, hosted on GitHub Pages.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}
