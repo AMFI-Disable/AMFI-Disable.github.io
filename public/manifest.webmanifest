@@ -1,0 +1,15 @@
+{
+  "name": "AMFI-Disable — Developer Hub",
+  "short_name": "AMFI-Disable",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "icons": [
+    {
+      "src": "/favicon.jpg",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
