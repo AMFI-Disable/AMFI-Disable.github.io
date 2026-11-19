@@ -63,20 +63,39 @@ async function copyText(text: string): Promise<void> {
   }
 }
 
+const colorSchemeMedia = window.matchMedia("(prefers-color-scheme: light)");
+
 function getInitialTheme(): "dark" | "light" {
   const stored = localStorage.getItem("hub-theme");
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return colorSchemeMedia.matches ? "light" : "dark";
 }
 
-function applyTheme(theme: "dark" | "light"): void {
+function applyTheme(theme: "dark" | "light", persist = false): void {
   document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem("hub-theme", theme);
+  const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.content = theme === "light" ? "#F6F8FA" : "#0B0E14";
+  }
+  if (persist) {
+    localStorage.setItem("hub-theme", theme);
+  }
   const btn = document.getElementById("theme-toggle");
   if (btn) {
     btn.innerHTML = `${getIcon(theme === "dark" ? "sun" : "moon")}<span>${theme === "dark" ? "Light" : "Dark"}</span>`;
     btn.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
   }
+}
+
+function syncDisplayContext(): void {
+  const root = document.documentElement;
+  const w = window.innerWidth;
+  root.setAttribute("data-viewport", w < 640 ? "mobile" : w < 1024 ? "tablet" : "desktop");
+  root.setAttribute("data-dpr", window.devicePixelRatio >= 2 ? "hidpi" : "standard");
+  root.setAttribute("data-pointer", window.matchMedia("(pointer: coarse)").matches ? "coarse" : "fine");
+  const ua = navigator.userAgent.toLowerCase();
+  const os = ua.includes("mac") ? "macos" : ua.includes("win") ? "windows" : ua.includes("linux") ? "linux" : "other";
+  root.setAttribute("data-os", os);
 }
 
 function statusBadgeClass(status: ProjectItem["status"]): string {
@@ -90,8 +109,9 @@ function renderProjectCard(project: ProjectItem): string {
     .map((tech) => `<span class="tag">${escapeHtml(tech)}</span>`)
     .join("");
 
+  const liveLabel = project.category === "Browser Games" ? "Play Live" : "Website";
   const liveLink = project.liveUrl
-    ? `<a class="card-link" href="${escapeHtml(project.liveUrl)}" target="_blank" rel="noopener noreferrer">Play Live ${getIcon("external")}</a>`
+    ? `<a class="card-link" href="${escapeHtml(project.liveUrl)}" target="_blank" rel="noopener noreferrer">${liveLabel} ${getIcon("external")}</a>`
     : "";
 
   const installBtn = project.installCmd
@@ -352,7 +372,7 @@ function bindEvents(): void {
     const themeBtn = target.closest<HTMLButtonElement>("#theme-toggle");
     if (themeBtn) {
       const current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-      applyTheme(current === "dark" ? "light" : "dark");
+      applyTheme(current === "dark" ? "light" : "dark", true);
       return;
     }
 
@@ -391,5 +411,13 @@ function bindEvents(): void {
     }
   });
 }
+
+syncDisplayContext();
+window.addEventListener("resize", syncDisplayContext, { passive: true });
+colorSchemeMedia.addEventListener("change", (event) => {
+  if (!localStorage.getItem("hub-theme")) {
+    applyTheme(event.matches ? "light" : "dark");
+  }
+});
 
 renderApp();
