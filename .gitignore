@@ -1,6 +1,48 @@
-node_modules/
-dist/
+# ==============================================================================
+# SECTION 1: WORKING & PRESERVED FILES (Explicit Whitelists)
+# ==============================================================================
+!src/
+!public/
+!index.html
+!package.json
+!package-lock.json
+!tsconfig.json
+!vite.config.ts
+!readme*.md
+!changelog.md
+!security.md
+!license
+!.gitignore
+!.github/
+
+# ==============================================================================
+# SECTION 2: HIDDEN & IGNORED ARTIFACTS
+# ==============================================================================
+# 2.1 System Metadata
 .DS_Store
-*.local
+._*
+Thumbs.db
+
+# 2.2 IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 2.3 Build Products, Caches & Output Directories
+build/
+dist/
+node_modules/
+
+# 2.4 Secrets, Environment Profiles & Diagnostics
 .env
 .env.*
+*.local
+*.pem
+*.key
+*.p12
+*.log
+scratch/
+tmp/
+.local/
