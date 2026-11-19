@@ -109,8 +109,9 @@ function renderProjectCard(project: ProjectItem): string {
     .map((tech) => `<span class="tag">${escapeHtml(tech)}</span>`)
     .join("");
 
+  const liveLabel = project.category === "Browser Games" ? "Play Live" : "Website";
   const liveLink = project.liveUrl
-    ? `<a class="card-link" href="${escapeHtml(project.liveUrl)}" target="_blank" rel="noopener noreferrer">Play Live ${getIcon("external")}</a>`
+    ? `<a class="card-link" href="${escapeHtml(project.liveUrl)}" target="_blank" rel="noopener noreferrer">${liveLabel} ${getIcon("external")}</a>`
     : "";
 
   const installBtn = project.installCmd
