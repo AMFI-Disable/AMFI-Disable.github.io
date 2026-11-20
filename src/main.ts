@@ -79,7 +79,7 @@ function updateThemedGraphs(theme: "dark" | "light"): void {
   const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
   if (starImg) {
     const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/svg?repos=AMFI-Disable/Juicer,AMFI-Disable/BrewStore,AMFI-Disable/GeoFS_Extension,AMFI-Disable/PathDeck,AMFI-Disable/OmniSuite,AMFI-Disable/RenYing,AMFI-Disable/DustIII&type=Date${themeParam}`;
+    starImg.src = `https://api.star-history.com/svg?repos=AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&type=Date${themeParam}`;
   }
 }
 
@@ -364,7 +364,7 @@ function renderApp(): void {
           </div>
           <div class="graph-card">
             <h3>Star History</h3>
-            <a href="https://www.star-history.com/#AMFI-Disable/Juicer,AMFI-Disable/BrewStore,AMFI-Disable/GeoFS_Extension,AMFI-Disable/PathDeck,AMFI-Disable/OmniSuite,AMFI-Disable/RenYing,AMFI-Disable/DustIII&Date" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.star-history.com/#AMFI-Disable/AMFI-Disable,AMFI-Disable/AMFI-Disable.github.io,AMFI-Disable/Brew-Ghost,AMFI-Disable/BrewStore,AMFI-Disable/DustIII,AMFI-Disable/FMG_Free-MapGenie,AMFI-Disable/GeoFS_Extension,AMFI-Disable/GimSell_Gimkit-Seller,AMFI-Disable/Homebrew-BrewStore,AMFI-Disable/Homebrew-Juicer,AMFI-Disable/Homebrew-Tap,AMFI-Disable/Juicer,AMFI-Disable/Lichess-AutoPlayer,AMFI-Disable/OmniSuite,AMFI-Disable/PathDeck,AMFI-Disable/RenYing,AMFI-Disable/TornTools&Date" target="_blank" rel="noopener noreferrer">
               <img id="star-history-img" alt="AMFI-Disable Star History Chart" loading="lazy" />
             </a>
           </div>
