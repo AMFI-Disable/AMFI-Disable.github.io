@@ -71,6 +71,34 @@ function getInitialTheme(): "dark" | "light" {
   return colorSchemeMedia.matches ? "light" : "dark";
 }
 
+function updateThemedGraphs(theme: "dark" | "light"): void {
+  const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
+  if (hexImg) {
+    hexImg.src = `https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-${theme}.svg`;
+  }
+  const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
+  if (starImg) {
+    const themeParam = theme === "dark" ? "&theme=dark" : "";
+    starImg.src = `https://api.star-history.com/svg?repos=AMFI-Disable/Juicer,AMFI-Disable/BrewStore,AMFI-Disable/GeoFS_Extension,AMFI-Disable/PathDeck,AMFI-Disable/OmniSuite,AMFI-Disable/RenYing,AMFI-Disable/DustIII&type=Date${themeParam}`;
+  }
+}
+
+async function refreshTotalStars(): Promise<void> {
+  const el = document.getElementById("total-stars-count");
+  if (!el) return;
+  try {
+    const res = await fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100");
+    if (!res.ok) return;
+    const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
+    const publicTotal = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+    if (publicTotal > 0) {
+      el.textContent = `${publicTotal} public stars (${publicTotal + 1} combined)`;
+    }
+  } catch {
+    // Keep static fallback count when offline or rate-limited
+  }
+}
+
 function applyTheme(theme: "dark" | "light", persist = false): void {
   document.documentElement.setAttribute("data-theme", theme);
   const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -85,6 +113,7 @@ function applyTheme(theme: "dark" | "light", persist = false): void {
     btn.innerHTML = `${getIcon(theme === "dark" ? "sun" : "moon")}<span>${theme === "dark" ? "Light" : "Dark"}</span>`;
     btn.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
   }
+  updateThemedGraphs(theme);
 }
 
 function syncDisplayContext(): void {
@@ -241,6 +270,7 @@ function renderApp(): void {
         <nav class="nav-links" aria-label="Primary">
           <a href="#projects">Projects</a>
           <a href="#homebrew">Homebrew</a>
+          <a href="#activity">Activity</a>
           <a href="#principles">Principles</a>
           <a href="#stack">Stack</a>
           <a href="#contact">Links</a>
@@ -316,6 +346,31 @@ function renderApp(): void {
         </div>
       </section>
 
+      <section id="activity" class="section">
+        <div class="stats-header-row">
+          <div>
+            <h2 class="section-title">GitHub Activity &amp; Star History</h2>
+            <p class="section-subtitle">Contribution hexagon calendar and combined repository star growth.</p>
+          </div>
+          <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noopener noreferrer">
+            <span>&#9733;</span>
+            <span id="total-stars-count">105 combined stars</span>
+          </a>
+        </div>
+        <div class="stats-grid">
+          <div class="graph-card">
+            <h3>Contribution Hexagon Graph</h3>
+            <img id="hexagon-graph-img" alt="AMFI-Disable Hexagonal Contribution Graph" loading="lazy" />
+          </div>
+          <div class="graph-card">
+            <h3>Star History</h3>
+            <a href="https://www.star-history.com/#AMFI-Disable/Juicer,AMFI-Disable/BrewStore,AMFI-Disable/GeoFS_Extension,AMFI-Disable/PathDeck,AMFI-Disable/OmniSuite,AMFI-Disable/RenYing,AMFI-Disable/DustIII&Date" target="_blank" rel="noopener noreferrer">
+              <img id="star-history-img" alt="AMFI-Disable Star History Chart" loading="lazy" />
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section id="principles" class="section">
         <div class="section-header">
           <div>
@@ -360,6 +415,7 @@ function renderApp(): void {
   applyTheme(getInitialTheme());
   renderFilteredProjects();
   bindEvents();
+  void refreshTotalStars();
 }
 
 function bindEvents(): void {
