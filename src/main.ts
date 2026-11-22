@@ -1,17 +1,39 @@
 import "./styles/main.css";
-import { HUB_CONFIG, type ProjectCategory, type ProjectItem } from "./data/hub";
+import { HUB_CONFIG, type HubId, type ProjectCategory, type ProjectItem } from "./data/hub";
 
 const CATEGORIES: Array<"All" | ProjectCategory> = [
   "All",
-  "macOS Apps",
   "Browser Games",
+  "macOS Apps",
   "Extensions",
   "CLI Tools",
 ];
 
+const HUB_TO_CATEGORY: Record<HubId, "All" | ProjectCategory> = {
+  all: "All",
+  arcade: "Browser Games",
+  studio: "macOS Apps",
+  hangar: "Extensions",
+  terminal: "CLI Tools",
+};
+
+const CATEGORY_TO_HUB: Record<"All" | ProjectCategory, HubId> = {
+  All: "all",
+  "Browser Games": "arcade",
+  "macOS Apps": "studio",
+  Extensions: "hangar",
+  "CLI Tools": "terminal",
+};
+
+let activeHub: HubId = "all";
 let activeCategory: "All" | ProjectCategory = "All";
 let searchQuery = "";
 let toastTimer: number | undefined;
+let hangarMode: "mv3" | "userscript" = "mv3";
+const studioBundle = new Set<string>(["juicer", "brewstore"]);
+let terminalLog = [
+  "AMFI Terminal Sandbox — type 'help', 'brew-ghost scan', or 'omnisuite search' below.",
+];
 
 function escapeHtml(text: string): string {
   return text
@@ -51,7 +73,7 @@ function showToast(message: string): void {
   window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => {
     toast.classList.remove("visible");
-  }, 2000);
+  }, 2200);
 }
 
 async function copyText(text: string): Promise<void> {
@@ -71,34 +93,6 @@ function getInitialTheme(): "dark" | "light" {
   return colorSchemeMedia.matches ? "light" : "dark";
 }
 
-function updateThemedGraphs(theme: "dark" | "light"): void {
-  const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
-  if (hexImg) {
-    hexImg.src = `https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-${theme}.svg`;
-  }
-  const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
-  if (starImg) {
-    const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/chart?repos=AMFI-Disable/AMFI-Disable%2CAMFI-Disable/AMFI-Disable.github.io%2CAMFI-Disable/Brew-Ghost%2CAMFI-Disable/BrewStore%2CAMFI-Disable/DustIII%2CAMFI-Disable/FMG_Free-MapGenie%2CAMFI-Disable/GeoFS_Extension%2CAMFI-Disable/GimSell_Gimkit-Seller%2CAMFI-Disable/Homebrew-BrewStore%2CAMFI-Disable/Homebrew-Juicer%2CAMFI-Disable/Homebrew-Tap%2CAMFI-Disable/Juicer%2CAMFI-Disable/Lichess-AutoPlayer%2CAMFI-Disable/OmniSuite%2CAMFI-Disable/PathDeck%2CAMFI-Disable/RenYing%2CAMFI-Disable/TornTools&type=date${themeParam}&legend=top-left`;
-  }
-}
-
-async function refreshTotalStars(): Promise<void> {
-  const el = document.getElementById("total-stars-count");
-  if (!el) return;
-  try {
-    const res = await fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100");
-    if (!res.ok) return;
-    const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
-    const publicTotal = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
-    if (publicTotal > 0) {
-      el.textContent = `${publicTotal} public stars (${publicTotal + 1} combined)`;
-    }
-  } catch {
-    // Keep static fallback count when offline or rate-limited
-  }
-}
-
 function applyTheme(theme: "dark" | "light", persist = false): void {
   document.documentElement.setAttribute("data-theme", theme);
   const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -113,7 +107,6 @@ function applyTheme(theme: "dark" | "light", persist = false): void {
     btn.innerHTML = `${getIcon(theme === "dark" ? "sun" : "moon")}<span>${theme === "dark" ? "Light" : "Dark"}</span>`;
     btn.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
   }
-  updateThemedGraphs(theme);
 }
 
 function syncDisplayContext(): void {
@@ -125,6 +118,188 @@ function syncDisplayContext(): void {
   const ua = navigator.userAgent.toLowerCase();
   const os = ua.includes("mac") ? "macos" : ua.includes("win") ? "windows" : ua.includes("linux") ? "linux" : "other";
   root.setAttribute("data-os", os);
+}
+
+function recordHubVisit(hub: HubId): void {
+  if (hub === "all") return;
+  try {
+    const raw = localStorage.getItem("amfi-visited-hubs");
+    const visited = new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    visited.add(hub);
+    localStorage.setItem("amfi-visited-hubs", JSON.stringify([...visited]));
+  } catch {
+    // ignore storage errors
+  }
+  updateExplorerStamp();
+}
+
+function updateExplorerStamp(): void {
+  const el = document.getElementById("explorer-stamp");
+  if (!el) return;
+  try {
+    const raw = localStorage.getItem("amfi-visited-hubs");
+    const count = raw ? (JSON.parse(raw) as string[]).length : 0;
+    el.textContent = `Explorer Passport: ${count}/4 Hubs Visited`;
+  } catch {
+    el.textContent = "Explorer Passport: 0/4 Hubs Visited";
+  }
+}
+
+function setActiveHub(hub: HubId, updateHash = true): void {
+  activeHub = hub;
+  activeCategory = HUB_TO_CATEGORY[hub];
+  const district = HUB_CONFIG.hubs.find((h) => h.id === hub);
+  if (district) {
+    document.documentElement.style.setProperty("--accent", district.accent);
+    recordHubVisit(hub);
+  } else {
+    document.documentElement.style.removeProperty("--accent");
+  }
+  if (updateHash) {
+    const targetHash = hub === "all" ? "#projects" : `#${hub}`;
+    if (window.location.hash !== targetHash) {
+      history.replaceState(null, "", targetHash);
+    }
+  }
+  document.querySelectorAll<HTMLElement>(".hub-card").forEach((card) => {
+    card.classList.toggle("active", card.dataset.hub === hub);
+  });
+  document.querySelectorAll<HTMLElement>(".filter-tab").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.category === activeCategory);
+  });
+  renderHubInteractive();
+  renderFilteredProjects();
+}
+
+function buildBundleCommand(): string {
+  const parts: string[] = [];
+  if (studioBundle.has("juicer")) parts.push("--cask juicer");
+  if (studioBundle.has("brewstore")) parts.push("--cask brewstore");
+  if (studioBundle.has("brew-ghost")) parts.push("brew-ghost");
+  if (parts.length === 0) return "brew tap AMFI-Disable/tap";
+  const casks = parts.filter((p) => p.startsWith("--cask"));
+  const formulae = parts.filter((p) => !p.startsWith("--cask"));
+  const cmds = ["brew tap AMFI-Disable/tap"];
+  if (casks.length) cmds.push(`brew install ${casks.join(" ")}`);
+  if (formulae.length) cmds.push(`brew install ${formulae.join(" ")}`);
+  return cmds.join(" && ");
+}
+
+function runTerminalCommand(raw: string): void {
+  const cmd = raw.trim().toLowerCase();
+  if (!cmd) return;
+  terminalLog.push(`$ ${raw.trim()}`);
+  if (cmd === "help") {
+    terminalLog.push("Available commands: brew-ghost scan | omnisuite search | clear | help");
+  } else if (cmd === "clear") {
+    terminalLog = ["Terminal cleared. Type 'help' for commands."];
+  } else if (cmd.startsWith("brew-ghost")) {
+    terminalLog.push(
+      "[brew-ghost] Scanning ~/.zsh_history (90-day window)...",
+      "  idle 142d  ffmpeg-legacy   (184 MB)",
+      "  idle 108d  hugo-0.110      ( 62 MB)",
+      "Run 'brew-ghost exorcise --dry-run' to preview safe cleanup."
+    );
+  } else if (cmd.startsWith("omnisuite")) {
+    terminalLog.push(
+      "[OmniSuite] Indexed 412 AFF / 389 NEG cards (SQLite FTS).",
+      "  [1] AFF-Grid-04  :: Heat-pump deployment elasticity (2025)",
+      "  [2] NEG-Cap-12   :: Municipal substation bottleneck (2024)"
+    );
+  } else {
+    terminalLog.push(`Unknown command '${raw.trim()}'. Try 'help', 'brew-ghost scan', or 'omnisuite search'.`);
+  }
+  const out = document.getElementById("terminal-output");
+  if (out) {
+    out.textContent = terminalLog.join("\n");
+    out.scrollTop = out.scrollHeight;
+  }
+}
+
+function renderHubInteractive(): void {
+  const container = document.getElementById("hub-interactive");
+  if (!container) return;
+
+  if (activeHub === "all") {
+    container.innerHTML = `
+      <div class="hub-interactive-head">
+        <h3>Explore by AMFI District</h3>
+        <button type="button" class="btn btn-secondary" id="surprise-me-btn">Surprise Me (Random Project)</button>
+      </div>
+      <p style="margin:0;color:var(--text-muted);font-size:0.9rem;">
+        Select <strong>AMFI Arcade</strong>, <strong>AMFI Studio</strong>, <strong>AMFI Hangar</strong>, or <strong>AMFI Terminal</strong> above to unlock each hub's interactive launcher, bundle builder, or CLI sandbox.
+      </p>
+    `;
+    return;
+  }
+
+  if (activeHub === "arcade") {
+    container.innerHTML = `
+      <div class="hub-interactive-head">
+        <h3>AMFI Arcade — Insert Coin</h3>
+        <button type="button" class="btn btn-primary" id="random-match-btn">Random Match</button>
+      </div>
+      <p style="margin:0;color:var(--text-muted);font-size:0.9rem;">
+        Zero-backend browser games running at 60fps in your tab. Launch <strong>RenYing</strong> for 1v1 WebRTC martial-arts duels or <strong>DustIII</strong> for 5v5 tactical defusal.
+      </p>
+    `;
+    return;
+  }
+
+  if (activeHub === "studio") {
+    const cmd = buildBundleCommand();
+    container.innerHTML = `
+      <div class="hub-interactive-head">
+        <h3>AMFI Studio — Homebrew Bundle Builder</h3>
+        <button type="button" class="card-copy-btn" data-copy="${escapeHtml(cmd)}">${getIcon("copy")} Copy Bundle</button>
+      </div>
+      <div class="bundle-checks">
+        <label class="bundle-check"><input type="checkbox" data-bundle="juicer" ${studioBundle.has("juicer") ? "checked" : ""} /> Juicer (macOS Suite)</label>
+        <label class="bundle-check"><input type="checkbox" data-bundle="brewstore" ${studioBundle.has("brewstore") ? "checked" : ""} /> BrewStore (Homebrew GUI)</label>
+        <label class="bundle-check"><input type="checkbox" data-bundle="brew-ghost" ${studioBundle.has("brew-ghost") ? "checked" : ""} /> Brew-Ghost (Cleanup CLI)</label>
+      </div>
+      <div class="brew-row">
+        <code id="bundle-cmd-text">${escapeHtml(cmd)}</code>
+      </div>
+    `;
+    return;
+  }
+
+  if (activeHub === "hangar") {
+    const steps =
+      hangarMode === "mv3"
+        ? "1. Build or download dist/ · 2. Open chrome://extensions · 3. Enable Developer Mode & Load unpacked."
+        : "1. Install Tampermonkey or Violentmonkey · 2. Import the .user.js file · 3. Open the target web app.";
+    container.innerHTML = `
+      <div class="hub-interactive-head">
+        <h3>AMFI Hangar — Loadout Setup Guide</h3>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="filter-tab ${hangarMode === "mv3" ? "active" : ""}" data-hangar-mode="mv3">Chrome MV3</button>
+          <button type="button" class="filter-tab ${hangarMode === "userscript" ? "active" : ""}" data-hangar-mode="userscript">Userscript</button>
+        </div>
+      </div>
+      <p style="margin:0;color:var(--text-muted);font-size:0.9rem;">${steps}</p>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="hub-interactive-head">
+      <h3>AMFI Terminal — Interactive CLI Sandbox</h3>
+      <div class="terminal-presets">
+        <button type="button" class="card-copy-btn" data-term-cmd="brew-ghost scan">brew-ghost scan</button>
+        <button type="button" class="card-copy-btn" data-term-cmd="omnisuite search">omnisuite search</button>
+        <button type="button" class="card-copy-btn" data-term-cmd="clear">clear</button>
+      </div>
+    </div>
+    <div class="terminal-box">
+      <pre id="terminal-output" class="terminal-output">${escapeHtml(terminalLog.join("\n"))}</pre>
+      <div class="terminal-input-row">
+        <span class="prompt-prefix">$</span>
+        <input id="terminal-input" class="terminal-input" type="text" placeholder="Type a command (e.g. brew-ghost scan) and press Enter..." />
+      </div>
+    </div>
+  `;
 }
 
 function statusBadgeClass(status: ProjectItem["status"]): string {
@@ -148,24 +323,21 @@ function renderProjectCard(project: ProjectItem): string {
     : "";
 
   return `
-    <article class="project-card">
-      <div>
-        <div class="card-top">
-          <div class="card-title-row">
-            <h3 class="card-title">${escapeHtml(project.name)}</h3>
-            <span class="${statusBadgeClass(project.status)}">${escapeHtml(project.status)}</span>
-          </div>
-          <span class="card-category">${escapeHtml(project.category)}</span>
+    <article class="card">
+      <div class="card-top">
+        <div>
+          <h3 class="card-title">${escapeHtml(project.name)}</h3>
+          <p class="card-tagline">${escapeHtml(project.tagline)}</p>
         </div>
-        <p class="card-tagline">${escapeHtml(project.tagline)}</p>
-        <p class="card-desc">${escapeHtml(project.description)}</p>
-        <div class="tag-list">${tags}</div>
+        <span class="${statusBadgeClass(project.status)}">${escapeHtml(project.status)}</span>
       </div>
-      <div class="card-footer">
-        <div class="card-links">
-          <a class="card-link" href="${escapeHtml(project.repoUrl)}" target="_blank" rel="noopener noreferrer">GitHub ${getIcon("external")}</a>
-          ${liveLink}
-        </div>
+      <p class="card-desc">${escapeHtml(project.description)}</p>
+      <div class="tag-list">${tags}</div>
+      <div class="card-actions">
+        <a class="card-link" href="${escapeHtml(project.repoUrl)}" target="_blank" rel="noopener noreferrer">
+          Repo ${getIcon("external")}
+        </a>
+        ${liveLink}
         ${installBtn}
       </div>
     </article>
@@ -179,8 +351,8 @@ function renderFilteredProjects(): void {
 
   const query = searchQuery.trim().toLowerCase();
   const filtered = HUB_CONFIG.projects.filter((project) => {
-    const matchesCategory = activeCategory === "All" || project.category === activeCategory;
-    if (!matchesCategory) return false;
+    const matchesCat = activeCategory === "All" || project.category === activeCategory;
+    if (!matchesCat) return false;
     if (!query) return true;
     const haystack = [
       project.name,
@@ -204,9 +376,74 @@ function renderFilteredProjects(): void {
   grid.innerHTML = filtered.map(renderProjectCard).join("");
 }
 
+function openCmdPalette(): void {
+  const backdrop = document.getElementById("cmd-backdrop");
+  const input = document.getElementById("cmd-modal-input") as HTMLInputElement | null;
+  if (!backdrop || !input) return;
+  backdrop.classList.add("open");
+  input.value = "";
+  renderCmdResults("");
+  input.focus();
+}
+
+function closeCmdPalette(): void {
+  document.getElementById("cmd-backdrop")?.classList.remove("open");
+}
+
+function renderCmdResults(q: string): void {
+  const box = document.getElementById("cmd-results");
+  if (!box) return;
+  const query = q.trim().toLowerCase();
+  const hubItems = HUB_CONFIG.hubs
+    .filter((h) => !query || h.name.toLowerCase().includes(query) || h.tagline.toLowerCase().includes(query))
+    .map(
+      (h) => `
+      <button type="button" class="cmd-item" data-cmd-hub="${h.id}">
+        <strong>${escapeHtml(h.name)}</strong>
+        <span>Switch Hub</span>
+      </button>`
+    );
+
+  const projItems = HUB_CONFIG.projects
+    .filter((p) => !query || p.name.toLowerCase().includes(query) || p.tagline.toLowerCase().includes(query))
+    .map(
+      (p) => `
+      <button type="button" class="cmd-item" data-cmd-url="${escapeHtml(p.liveUrl || p.repoUrl)}">
+        <strong>${escapeHtml(p.name)}</strong>
+        <span>${escapeHtml(p.category)} &rarr;</span>
+      </button>`
+    );
+
+  box.innerHTML = [...hubItems, ...projItems].join("") || `<div class="empty-state">No matches</div>`;
+}
+
+function launchRandomProject(onlyArcade = false): void {
+  const pool = onlyArcade
+    ? HUB_CONFIG.projects.filter((p) => p.hub === "arcade")
+    : HUB_CONFIG.projects;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  if (!pick) return;
+  const target = pick.liveUrl || pick.repoUrl;
+  showToast(`Launching ${pick.name}...`);
+  window.open(target, "_blank", "noopener,noreferrer");
+}
+
 function renderApp(): void {
   const root = document.getElementById("app");
   if (!root) return;
+
+  const hubsHtml = HUB_CONFIG.hubs
+    .map(
+      (hub) => `
+      <button type="button" class="hub-card ${activeHub === hub.id ? "active" : ""}" data-hub="${hub.id}" style="--hub-color:${hub.accent}">
+        <div class="hub-card-top">
+          <h3><span class="hub-dot"></span>${escapeHtml(hub.name)}</h3>
+          <span class="hub-badge">${escapeHtml(hub.badge)}</span>
+        </div>
+        <p>${escapeHtml(hub.tagline)}</p>
+      </button>`
+    )
+    .join("");
 
   const filterButtons = CATEGORIES.map((cat) => {
     const activeClass = cat === activeCategory ? "active" : "";
@@ -263,19 +500,18 @@ function renderApp(): void {
   root.innerHTML = `
     <header class="site-header">
       <div class="container header-inner">
-        <a href="#top" class="brand">
+        <a href="#top" class="brand" data-hub-nav="all">
           <span class="brand-mark">&gt;_</span>
           <span>${escapeHtml(HUB_CONFIG.brand)}</span>
         </a>
-        <nav class="nav-links" aria-label="Primary">
-          <a href="#projects">Projects</a>
-          <a href="#homebrew">Homebrew</a>
-          <a href="#activity">Activity</a>
-          <a href="#principles">Principles</a>
-          <a href="#stack">Stack</a>
-          <a href="#contact">Links</a>
+        <nav class="nav-links" aria-label="AMFI Hubs">
+          <a href="#arcade" data-hub-nav="arcade">Arcade</a>
+          <a href="#studio" data-hub-nav="studio">Studio</a>
+          <a href="#hangar" data-hub-nav="hangar">Hangar</a>
+          <a href="#terminal" data-hub-nav="terminal">Terminal</a>
         </nav>
         <div class="header-actions">
+          <button type="button" id="cmd-open-btn" class="icon-btn" title="Quick Launcher (Ctrl/Cmd+K)">⌘K Search</button>
           <button type="button" id="theme-toggle" class="icon-btn"></button>
         </div>
       </div>
@@ -290,7 +526,7 @@ function renderApp(): void {
         <h1 class="hero-title">${escapeHtml(HUB_CONFIG.headline)}</h1>
         <p class="hero-bio">${escapeHtml(HUB_CONFIG.bio)}</p>
         <div class="hero-actions">
-          <a href="#projects" class="btn btn-primary">Explore Projects</a>
+          <a href="#projects" class="btn btn-primary">Explore Hubs</a>
           <a href="${escapeHtml(HUB_CONFIG.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
             GitHub Profile ${getIcon("external")}
           </a>
@@ -305,10 +541,15 @@ function renderApp(): void {
       <section id="projects" class="section">
         <div class="section-header">
           <div>
-            <h2 class="section-title">Selected Projects</h2>
+            <h2 class="section-title">AMFI Ecosystem Hubs</h2>
             <p class="section-subtitle" id="projects-count"></p>
           </div>
+          <span id="explorer-stamp" class="explorer-stamp"></span>
         </div>
+
+        <div class="hubs-grid">${hubsHtml}</div>
+        <div id="hub-interactive" class="hub-interactive"></div>
+
         <div class="toolbar">
           <div class="filter-tabs" role="tablist" aria-label="Filter projects by category">
             ${filterButtons}
@@ -342,31 +583,6 @@ function renderApp(): void {
               <button type="button" class="card-copy-btn" data-copy="${escapeHtml(HUB_CONFIG.brewTapCmd)}">${getIcon("copy")} Copy</button>
             </div>
             ${brewRows}
-          </div>
-        </div>
-      </section>
-
-      <section id="activity" class="section">
-        <div class="stats-header-row">
-          <div>
-            <h2 class="section-title">GitHub Activity &amp; Star History</h2>
-            <p class="section-subtitle">Contribution hexagon calendar and combined repository star growth.</p>
-          </div>
-          <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noopener noreferrer">
-            <span>&#9733;</span>
-            <span id="total-stars-count">105 combined stars</span>
-          </a>
-        </div>
-        <div class="stats-grid">
-          <div class="graph-card">
-            <h3>Contribution Hexagon Graph</h3>
-            <img id="hexagon-graph-img" alt="AMFI-Disable Hexagonal Contribution Graph" loading="lazy" />
-          </div>
-          <div class="graph-card">
-            <h3>Star History</h3>
-            <a href="https://www.star-history.com/?type=date&repos=AMFI-Disable%2FAMFI-Disable%2CAMFI-Disable%2FAMFI-Disable.github.io%2CAMFI-Disable%2FBrew-Ghost%2CAMFI-Disable%2FBrewStore%2CAMFI-Disable%2FDustIII%2CAMFI-Disable%2FFMG_Free-MapGenie%2CAMFI-Disable%2FGeoFS_Extension%2CAMFI-Disable%2FGimSell_Gimkit-Seller%2CAMFI-Disable%2FHomebrew-BrewStore%2CAMFI-Disable%2FHomebrew-Juicer%2CAMFI-Disable%2FHomebrew-Tap%2CAMFI-Disable%2FJuicer%2CAMFI-Disable%2FLichess-AutoPlayer%2CAMFI-Disable%2FOmniSuite%2CAMFI-Disable%2FPathDeck%2CAMFI-Disable%2FRenYing%2CAMFI-Disable%2FTornTools" target="_blank" rel="noopener noreferrer">
-              <img id="star-history-img" alt="Star History Chart" loading="lazy" />
-            </a>
           </div>
         </div>
       </section>
@@ -406,24 +622,42 @@ function renderApp(): void {
 
     <footer class="container site-footer">
       <span>&copy; ${new Date().getFullYear()} ${escapeHtml(HUB_CONFIG.brand)}. MIT Licensed.</span>
-      <span>Built with Vite & TypeScript · Hosted on GitHub Pages</span>
+      <span>AMFI Arcade · Studio · Hangar · Terminal</span>
     </footer>
+
+    <div id="cmd-backdrop" class="cmd-backdrop" role="dialog" aria-modal="true" aria-label="Quick Launcher">
+      <div class="cmd-modal">
+        <input id="cmd-modal-input" class="cmd-modal-input" type="search" placeholder="Jump to project or hub (Arcade, Studio, Hangar, Terminal)..." />
+        <div id="cmd-results" class="cmd-results"></div>
+      </div>
+    </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   `;
 
   applyTheme(getInitialTheme());
-  renderFilteredProjects();
-  bindEvents();
-  void refreshTotalStars();
-}
+  updateExplorerStamp();
 
-function bindEvents(): void {
-  const root = document.getElementById("app");
-  if (!root) return;
+  const initialHash = window.location.hash.replace("#", "") as HubId;
+  if (initialHash && initialHash in HUB_TO_CATEGORY) {
+    setActiveHub(initialHash, false);
+  } else {
+    renderHubInteractive();
+    renderFilteredProjects();
+  }
 
   root.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
+
+    if (target.id === "cmd-backdrop") {
+      closeCmdPalette();
+      return;
+    }
+
+    if (target.closest("#cmd-open-btn")) {
+      openCmdPalette();
+      return;
+    }
 
     const themeBtn = target.closest<HTMLButtonElement>("#theme-toggle");
     if (themeBtn) {
@@ -432,15 +666,63 @@ function bindEvents(): void {
       return;
     }
 
-    const tab = target.closest<HTMLButtonElement>(".filter-tab");
-    if (tab) {
-      const cat = tab.dataset.category as "All" | ProjectCategory | undefined;
-      if (cat) {
-        activeCategory = cat;
-        root.querySelectorAll(".filter-tab").forEach((el) => el.classList.remove("active"));
-        tab.classList.add("active");
-        renderFilteredProjects();
-      }
+    const hubNav = target.closest<HTMLElement>("[data-hub-nav]");
+    if (hubNav?.dataset.hubNav) {
+      const h = hubNav.dataset.hubNav as HubId;
+      setActiveHub(h);
+      document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    const hubCard = target.closest<HTMLElement>(".hub-card");
+    if (hubCard?.dataset.hub) {
+      const clicked = hubCard.dataset.hub as HubId;
+      setActiveHub(activeHub === clicked ? "all" : clicked);
+      return;
+    }
+
+    const tab = target.closest<HTMLButtonElement>(".filter-tab[data-category]");
+    if (tab?.dataset.category) {
+      const cat = tab.dataset.category as "All" | ProjectCategory;
+      setActiveHub(CATEGORY_TO_HUB[cat]);
+      return;
+    }
+
+    const hangarBtn = target.closest<HTMLButtonElement>("[data-hangar-mode]");
+    if (hangarBtn?.dataset.hangarMode) {
+      hangarMode = hangarBtn.dataset.hangarMode as "mv3" | "userscript";
+      renderHubInteractive();
+      return;
+    }
+
+    const termBtn = target.closest<HTMLButtonElement>("[data-term-cmd]");
+    if (termBtn?.dataset.termCmd) {
+      runTerminalCommand(termBtn.dataset.termCmd);
+      return;
+    }
+
+    if (target.closest("#surprise-me-btn")) {
+      launchRandomProject(false);
+      return;
+    }
+
+    if (target.closest("#random-match-btn")) {
+      launchRandomProject(true);
+      return;
+    }
+
+    const cmdHub = target.closest<HTMLButtonElement>("[data-cmd-hub]");
+    if (cmdHub?.dataset.cmdHub) {
+      setActiveHub(cmdHub.dataset.cmdHub as HubId);
+      closeCmdPalette();
+      document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    const cmdUrl = target.closest<HTMLButtonElement>("[data-cmd-url]");
+    if (cmdUrl?.dataset.cmdUrl) {
+      closeCmdPalette();
+      window.open(cmdUrl.dataset.cmdUrl, "_blank", "noopener,noreferrer");
       return;
     }
 
@@ -450,13 +732,44 @@ function bindEvents(): void {
     }
   });
 
+  root.addEventListener("change", (event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.dataset.bundle) {
+      if (target.checked) studioBundle.add(target.dataset.bundle);
+      else studioBundle.delete(target.dataset.bundle);
+      renderHubInteractive();
+    }
+  });
+
+  root.addEventListener("keydown", (event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.id === "terminal-input" && event.key === "Enter") {
+      runTerminalCommand(target.value);
+      target.value = "";
+    }
+  });
+
   const searchInput = document.getElementById("project-search") as HTMLInputElement | null;
   searchInput?.addEventListener("input", () => {
     searchQuery = searchInput.value;
     renderFilteredProjects();
   });
 
+  const cmdInput = document.getElementById("cmd-modal-input") as HTMLInputElement | null;
+  cmdInput?.addEventListener("input", () => {
+    renderCmdResults(cmdInput.value);
+  });
+
   document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      openCmdPalette();
+      return;
+    }
+    if (event.key === "Escape") {
+      closeCmdPalette();
+      return;
+    }
     if (
       event.key === "/" &&
       document.activeElement?.tagName !== "INPUT" &&
@@ -464,6 +777,13 @@ function bindEvents(): void {
     ) {
       event.preventDefault();
       searchInput?.focus();
+    }
+  });
+
+  window.addEventListener("hashchange", () => {
+    const h = window.location.hash.replace("#", "") as HubId;
+    if (h && h in HUB_TO_CATEGORY) {
+      setActiveHub(h, false);
     }
   });
 }

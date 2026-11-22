@@ -1,11 +1,23 @@
+export type HubId = "all" | "arcade" | "studio" | "hangar" | "terminal";
+
 export type ProjectCategory =
   | "macOS Apps"
   | "Browser Games"
   | "Extensions"
   | "CLI Tools";
 
+export interface HubDistrict {
+  id: Exclude<HubId, "all">;
+  name: string;
+  category: ProjectCategory;
+  accent: string;
+  tagline: string;
+  badge: string;
+}
+
 export interface ProjectItem {
   id: string;
+  hub: Exclude<HubId, "all">;
   name: string;
   category: ProjectCategory;
   tagline: string;
@@ -86,9 +98,44 @@ export const HUB_CONFIG = {
       items: ["Textual", "uv", "Docker", "Cloudflare Workers", "GitHub Actions", "Homebrew"],
     },
   ] satisfies StackGroup[],
+  hubs: [
+    {
+      id: "arcade",
+      name: "AMFI Arcade",
+      category: "Browser Games",
+      accent: "#E53935",
+      tagline: "Zero-backend WebGL & Canvas browser games—insert coin and play instantly.",
+      badge: "Playable Now",
+    },
+    {
+      id: "studio",
+      name: "AMFI Studio",
+      category: "macOS Apps",
+      accent: "#2EA3F2",
+      tagline: "Native SwiftUI desktop utilities and Homebrew companions built for macOS.",
+      badge: "macOS 14+",
+    },
+    {
+      id: "hangar",
+      name: "AMFI Hangar",
+      category: "Extensions",
+      accent: "#66BB6A",
+      tagline: "Manifest V3 browser extensions and Stockfish/automation userscripts.",
+      badge: "Browser Loadout",
+    },
+    {
+      id: "terminal",
+      name: "AMFI Terminal",
+      category: "CLI Tools",
+      accent: "#FBC02D",
+      tagline: "Fast Python CLIs and Textual TUIs for debate research and Homebrew hygiene.",
+      badge: "CLI & TUI",
+    },
+  ] satisfies HubDistrict[],
   projects: [
     {
       id: "juicer",
+      hub: "studio",
       name: "Juicer",
       category: "macOS Apps",
       tagline: "All-in-one local-first macOS utility suite",
@@ -103,6 +150,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "brewstore",
+      hub: "studio",
       name: "BrewStore",
       category: "macOS Apps",
       tagline: "Native macOS GUI & CLI companion for Homebrew",
@@ -117,6 +165,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "pathdeck",
+      hub: "studio",
       name: "PathDeck",
       category: "macOS Apps",
       tagline: "Visual shell PATH, alias & environment studio",
@@ -130,6 +179,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "renying",
+      hub: "arcade",
       name: "RenYing",
       category: "Browser Games",
       tagline: "Ink-wash martial-arts duel with WebRTC P2P",
@@ -143,6 +193,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "dustiii",
+      hub: "arcade",
       name: "DustIII",
       category: "Browser Games",
       tagline: "Browser-native 5v5 bomb defusal on de_dust2",
@@ -156,6 +207,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "geofs-extension",
+      hub: "hangar",
       name: "GeoFS_Extension",
       category: "Extensions",
       tagline: "All-in-one flight deck companion for GeoFS",
@@ -169,6 +221,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "lichess-autoplayer",
+      hub: "hangar",
       name: "Lichess-AutoPlayer",
       category: "Extensions",
       tagline: "Stockfish WASM userscript & companion",
@@ -182,6 +235,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "gimsell",
+      hub: "hangar",
       name: "GimSell_Gimkit-Seller",
       category: "Extensions",
       tagline: "Client-side duplicate cosmetic seller for Gimkit",
@@ -195,6 +249,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "omnisuite",
+      hub: "terminal",
       name: "OmniSuite",
       category: "CLI Tools",
       tagline: "Terminal workstation for debate & forensics",
@@ -208,6 +263,7 @@ export const HUB_CONFIG = {
     },
     {
       id: "brew-ghost",
+      hub: "terminal",
       name: "Brew-Ghost",
       category: "CLI Tools",
       tagline: "Behavioral shell-history cleanup for Homebrew",
