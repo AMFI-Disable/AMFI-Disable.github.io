@@ -14,6 +14,18 @@
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?type=date&repos=amfi-disable%2Famfi-disable.github.io">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=amfi-disable%2Famfi-disable.github.io&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=amfi-disable%2Famfi-disable.github.io&type=date&legend=top-left" />
+    <img alt="AMFI-Disable/AMFI-Disable.github.io Star History Chart" src="https://api.star-history.com/chart?repos=amfi-disable%2Famfi-disable.github.io&type=date&legend=top-left" />
+  </picture>
+</a>
+
+---
+
 Personal developer hub and portfolio website for **AMFI-Disable**, built with **Vite + TypeScript** and configured for automated deployment to **GitHub Pages**.
 
 ## Key Features
@@ -91,29 +103,3 @@ This repository includes `.github/workflows/deploy.yml`, which automatically bui
 ## License
 
 Licensed under the [MIT License](license). Copyright (c) 2026 AMFI-Disable.
-
----
-
-## GitHub Activity & Stars
-
-[![Total Stars](https://img.shields.io/github/stars/AMFI-Disable?affiliations=OWNER&style=flat-square&label=Total%20Stars&color=f59e0b)](https://github.com/AMFI-Disable?tab=repositories)
-
-> **105 combined stars** across all AMFI-Disable repositories.
-
-### Contribution Hexagon Graph
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-light.svg" />
-  <img alt="AMFI-Disable Hexagonal Contribution Graph" src="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-dark.svg" />
-</picture>
-
-### Star History
-
-<a href="https://www.star-history.com/?type=date&repos=AMFI-Disable%2FAMFI-Disable%2CAMFI-Disable%2FAMFI-Disable.github.io%2CAMFI-Disable%2FBrew-Ghost%2CAMFI-Disable%2FBrewStore%2CAMFI-Disable%2FDustIII%2CAMFI-Disable%2FFMG_Free-MapGenie%2CAMFI-Disable%2FGeoFS_Extension%2CAMFI-Disable%2FGimSell_Gimkit-Seller%2CAMFI-Disable%2FHomebrew-BrewStore%2CAMFI-Disable%2FHomebrew-Juicer%2CAMFI-Disable%2FHomebrew-Tap%2CAMFI-Disable%2FJuicer%2CAMFI-Disable%2FLichess-AutoPlayer%2CAMFI-Disable%2FOmniSuite%2CAMFI-Disable%2FPathDeck%2CAMFI-Disable%2FRenYing%2CAMFI-Disable%2FTornTools">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AMFI-Disable/AMFI-Disable%2CAMFI-Disable/AMFI-Disable.github.io%2CAMFI-Disable/Brew-Ghost%2CAMFI-Disable/BrewStore%2CAMFI-Disable/DustIII%2CAMFI-Disable/FMG_Free-MapGenie%2CAMFI-Disable/GeoFS_Extension%2CAMFI-Disable/GimSell_Gimkit-Seller%2CAMFI-Disable/Homebrew-BrewStore%2CAMFI-Disable/Homebrew-Juicer%2CAMFI-Disable/Homebrew-Tap%2CAMFI-Disable/Juicer%2CAMFI-Disable/Lichess-AutoPlayer%2CAMFI-Disable/OmniSuite%2CAMFI-Disable/PathDeck%2CAMFI-Disable/RenYing%2CAMFI-Disable/TornTools&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AMFI-Disable/AMFI-Disable%2CAMFI-Disable/AMFI-Disable.github.io%2CAMFI-Disable/Brew-Ghost%2CAMFI-Disable/BrewStore%2CAMFI-Disable/DustIII%2CAMFI-Disable/FMG_Free-MapGenie%2CAMFI-Disable/GeoFS_Extension%2CAMFI-Disable/GimSell_Gimkit-Seller%2CAMFI-Disable/Homebrew-BrewStore%2CAMFI-Disable/Homebrew-Juicer%2CAMFI-Disable/Homebrew-Tap%2CAMFI-Disable/Juicer%2CAMFI-Disable/Lichess-AutoPlayer%2CAMFI-Disable/OmniSuite%2CAMFI-Disable/PathDeck%2CAMFI-Disable/RenYing%2CAMFI-Disable/TornTools&type=date&legend=top-left" />
-    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AMFI-Disable/AMFI-Disable%2CAMFI-Disable/AMFI-Disable.github.io%2CAMFI-Disable/Brew-Ghost%2CAMFI-Disable/BrewStore%2CAMFI-Disable/DustIII%2CAMFI-Disable/FMG_Free-MapGenie%2CAMFI-Disable/GeoFS_Extension%2CAMFI-Disable/GimSell_Gimkit-Seller%2CAMFI-Disable/Homebrew-BrewStore%2CAMFI-Disable/Homebrew-Juicer%2CAMFI-Disable/Homebrew-Tap%2CAMFI-Disable/Juicer%2CAMFI-Disable/Lichess-AutoPlayer%2CAMFI-Disable/OmniSuite%2CAMFI-Disable/PathDeck%2CAMFI-Disable/RenYing%2CAMFI-Disable/TornTools&type=date&legend=top-left" />
-  </picture>
-</a>

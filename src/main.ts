@@ -87,6 +87,37 @@ async function copyText(text: string): Promise<void> {
 
 const colorSchemeMedia = window.matchMedia("(prefers-color-scheme: light)");
 
+const ALL_REPOS_ENCODED =
+  "amfi-disable%2Famfi-disable%2Camfi-disable%2Famfi-disable.github.io%2Camfi-disable%2Fbrew-ghost%2Camfi-disable%2Fbrewstore%2Camfi-disable%2Fdustiii%2Camfi-disable%2Ffmg_free-mapgenie%2Camfi-disable%2Fgeofs_extension%2Camfi-disable%2Fgeofs_liveryselector%2Camfi-disable%2Fgimsell_gimkit-seller%2Camfi-disable%2Fhomebrew-brewstore%2Camfi-disable%2Fhomebrew-juicer%2Camfi-disable%2Fhomebrew-tap%2Camfi-disable%2Fjuicer%2Camfi-disable%2Flichess-autoplayer%2Camfi-disable%2Fomnisuite%2Camfi-disable%2Fpathdeck%2Camfi-disable%2Frenying%2Camfi-disable%2Ftorntools";
+
+function updateThemedGraphs(theme: "dark" | "light"): void {
+  const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
+  if (starImg) {
+    const themeParam = theme === "dark" ? "&theme=dark" : "";
+    starImg.src = `https://api.star-history.com/chart?repos=${ALL_REPOS_ENCODED}&type=date${themeParam}&legend=top-left`;
+  }
+  const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
+  if (hexImg) {
+    hexImg.src = `https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-${theme}.svg`;
+  }
+}
+
+async function refreshTotalStars(): Promise<void> {
+  const el = document.getElementById("total-stars-count");
+  if (!el) return;
+  try {
+    const res = await fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100");
+    if (!res.ok) return;
+    const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
+    const publicTotal = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+    if (publicTotal > 0) {
+      el.textContent = `${publicTotal} total stars`;
+    }
+  } catch {
+    // Keep initial fallback count when offline or rate-limited
+  }
+}
+
 function getInitialTheme(): "dark" | "light" {
   const stored = localStorage.getItem("hub-theme");
   if (stored === "light" || stored === "dark") return stored;
@@ -107,6 +138,7 @@ function applyTheme(theme: "dark" | "light", persist = false): void {
     btn.innerHTML = `${getIcon(theme === "dark" ? "sun" : "moon")}<span>${theme === "dark" ? "Light" : "Dark"}</span>`;
     btn.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
   }
+  updateThemedGraphs(theme);
 }
 
 function syncDisplayContext(): void {
@@ -505,6 +537,7 @@ function renderApp(): void {
           <span>${escapeHtml(HUB_CONFIG.brand)}</span>
         </a>
         <nav class="nav-links" aria-label="AMFI Hubs">
+          <a href="#activity">Star History</a>
           <a href="#arcade" data-hub-nav="arcade">Arcade</a>
           <a href="#studio" data-hub-nav="studio">Studio</a>
           <a href="#hangar" data-hub-nav="hangar">Hangar</a>
@@ -535,6 +568,31 @@ function renderApp(): void {
             <span>${escapeHtml(HUB_CONFIG.brewTapCmd)}</span>
             ${getIcon("copy")}
           </button>
+        </div>
+      </section>
+
+      <section id="activity" class="section">
+        <div class="stats-header-row">
+          <div>
+            <h2 class="section-title">GitHub Star History &amp; Activity</h2>
+            <p class="section-subtitle">Combined star growth across all repositories and personal contribution hexagon graph.</p>
+          </div>
+          <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noopener noreferrer">
+            <span>&#9733;</span>
+            <span id="total-stars-count">105 total stars</span>
+          </a>
+        </div>
+        <div class="stats-grid">
+          <div class="graph-card">
+            <h3>Combined Star History (All Repositories)</h3>
+            <a href="https://www.star-history.com/?type=date&repos=${ALL_REPOS_ENCODED}" target="_blank" rel="noopener noreferrer">
+              <img id="star-history-img" alt="AMFI-Disable Combined Star History Chart" loading="lazy" />
+            </a>
+          </div>
+          <div class="graph-card">
+            <h3>Contribution Hexagon Graph</h3>
+            <img id="hexagon-graph-img" alt="AMFI-Disable Hexagonal Contribution Graph" loading="lazy" />
+          </div>
         </div>
       </section>
 
@@ -636,6 +694,7 @@ function renderApp(): void {
   `;
 
   applyTheme(getInitialTheme());
+  void refreshTotalStars();
   updateExplorerStamp();
 
   const initialHash = window.location.hash.replace("#", "") as HubId;
