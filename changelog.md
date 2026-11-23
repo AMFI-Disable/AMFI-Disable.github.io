@@ -8,6 +8,7 @@ All notable changes, features, and fixes for this project are documented in this
 
 ### Changed
 
+- Restored the Star History chart section in `readme.md` and `src/main.ts`, replacing the embedded contribution hexagon block.
 - Standardized documentation filenames (`readme.md`, `license`), security policy (`security.md`), `.gitignore` layout, and `.github/` templates.
 
 ---
