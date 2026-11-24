@@ -88,7 +88,7 @@ async function copyText(text: string): Promise<void> {
 const colorSchemeMedia = window.matchMedia("(prefers-color-scheme: light)");
 
 const ALL_REPOS_ENCODED =
-  "amfi-disable%2Famfi-disable%2Camfi-disable%2Famfi-disable.github.io%2Camfi-disable%2Fbrew-ghost%2Camfi-disable%2Fbrewstore%2Camfi-disable%2Fdustiii%2Camfi-disable%2Ffmg_free-mapgenie%2Camfi-disable%2Fgeofs_extension%2Camfi-disable%2Fgeofs_liveryselector%2Camfi-disable%2Fgimsell_gimkit-seller%2Camfi-disable%2Fhomebrew-brewstore%2Camfi-disable%2Fhomebrew-juicer%2Camfi-disable%2Fhomebrew-tap%2Camfi-disable%2Fjuicer%2Camfi-disable%2Flichess-autoplayer%2Camfi-disable%2Fomnisuite%2Camfi-disable%2Fpathdeck%2Camfi-disable%2Frenying%2Camfi-disable%2Ftorntools";
+  "amfi-disable%2Famfi-disable%2Camfi-disable%2Famfi-disable.github.io%2Camfi-disable%2Fbrew-ghost%2Camfi-disable%2Fbrewstore%2Camfi-disable%2Ffmg_free-mapgenie%2Camfi-disable%2Fgeofs_extension%2Camfi-disable%2Fgeofs_liveryselector%2Camfi-disable%2Fgimsell_gimkit-seller%2Camfi-disable%2Fhomebrew-brewstore%2Camfi-disable%2Fhomebrew-juicer%2Camfi-disable%2Fhomebrew-tap%2Camfi-disable%2Fjuicer%2Camfi-disable%2Flichess-autoplayer%2Camfi-disable%2Fomnisuite%2Camfi-disable%2Fpathdeck%2Camfi-disable%2Ftorntools%2Cbigbraindevbros%2Ffaceoff%2Cbigbraindevbros%2Frenying";
 
 function updateThemedGraphs(theme: "dark" | "light"): void {
   const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
@@ -106,10 +106,18 @@ async function refreshTotalStars(): Promise<void> {
   const el = document.getElementById("total-stars-count");
   if (!el) return;
   try {
-    const res = await fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100");
-    if (!res.ok) return;
-    const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
-    const publicTotal = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+    const [userRes, orgRes] = await Promise.all([
+      fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100"),
+      fetch("https://api.github.com/orgs/BigBrainDevBros/repos?per_page=100"),
+    ]);
+    if (!userRes.ok && !orgRes.ok) return;
+    const sumStars = async (res: Response) => {
+      if (!res.ok) return 0;
+      const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
+      return repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+    };
+    const [userTotal, orgTotal] = await Promise.all([sumStars(userRes), sumStars(orgRes)]);
+    const publicTotal = userTotal + orgTotal;
     if (publicTotal > 0) {
       el.textContent = `${publicTotal} total stars`;
     }
@@ -272,7 +280,7 @@ function renderHubInteractive(): void {
         <button type="button" class="btn btn-primary" id="random-match-btn">Random Match</button>
       </div>
       <p style="margin:0;color:var(--text-muted);font-size:0.9rem;">
-        Zero-backend browser games running at 60fps in your tab. Launch <strong>RenYing</strong> for 1v1 WebRTC martial-arts duels or <strong>DustIII</strong> for 5v5 tactical defusal.
+        Zero-backend browser games running at 60fps in your tab. Launch <strong>RenYing</strong> for 1v1 WebRTC martial-arts duels or <strong>FaceOff</strong> for 5v5 tactical defusal.
       </p>
     `;
     return;
@@ -579,7 +587,7 @@ function renderApp(): void {
           </div>
           <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noopener noreferrer">
             <span>&#9733;</span>
-            <span id="total-stars-count">105 total stars</span>
+            <span id="total-stars-count">107 total stars</span>
           </a>
         </div>
         <div class="stats-grid">
