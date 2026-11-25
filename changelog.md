@@ -9,9 +9,13 @@ All notable changes, features, and fixes for this project are documented in this
 ### Changed
 
 - Display the same dated public star history as the profile, with separate owner totals. Added VANTAGE with creator credit and updated FaceOff’s arena description.
-
 - Restored the Star History chart section in `readme.md` and `src/main.ts`, replacing the embedded contribution hexagon block.
 - Standardized documentation filenames (`readme.md`, `license`), security policy (`security.md`), `.gitignore` layout, and `.github/` templates.
+
+### Fixed
+
+- Restored the dynamic Star History chart (including `BigBrainDevBros/VANTAGE`) and live total stars counter in `src/main.ts` and `src/styles/main.css`.
+- Updated the repository directory tree in `readme.md` to reference `public/favicon.jpg` and `public/manifest.webmanifest`.
 
 ---
 
