@@ -698,19 +698,6 @@ input {
   margin-bottom: 20px;
 }
 
-.total-stars-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border-radius: var(--radius-pill);
-  background: var(--amber-soft);
-  color: var(--amber);
-  border: 1px solid rgba(210, 153, 34, 0.3);
-  font-size: 0.86rem;
-  font-weight: 600;
-}
-
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));

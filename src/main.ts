@@ -87,42 +87,10 @@ async function copyText(text: string): Promise<void> {
 
 const colorSchemeMedia = window.matchMedia("(prefers-color-scheme: light)");
 
-const ALL_REPOS_ENCODED =
-  "amfi-disable%2Famfi-disable%2Camfi-disable%2Famfi-disable.github.io%2Camfi-disable%2Fbrew-ghost%2Camfi-disable%2Fbrewstore%2Camfi-disable%2Ffmg_free-mapgenie%2Camfi-disable%2Fgeofs_extension%2Camfi-disable%2Fgeofs_liveryselector%2Camfi-disable%2Fgimsell_gimkit-seller%2Camfi-disable%2Fhomebrew-brewstore%2Camfi-disable%2Fhomebrew-juicer%2Camfi-disable%2Fhomebrew-tap%2Camfi-disable%2Fjuicer%2Camfi-disable%2Flichess-autoplayer%2Camfi-disable%2Fomnisuite%2Camfi-disable%2Fpathdeck%2Camfi-disable%2Ftorntools%2Cbigbraindevbros%2Ffaceoff%2Cbigbraindevbros%2Frenying";
-
 function updateThemedGraphs(theme: "dark" | "light"): void {
-  const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
-  if (starImg) {
-    const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/chart?repos=${ALL_REPOS_ENCODED}&type=date${themeParam}&legend=top-left`;
-  }
   const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
   if (hexImg) {
     hexImg.src = `https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/contribution-hexagon-${theme}.svg`;
-  }
-}
-
-async function refreshTotalStars(): Promise<void> {
-  const el = document.getElementById("total-stars-count");
-  if (!el) return;
-  try {
-    const [userRes, orgRes] = await Promise.all([
-      fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100"),
-      fetch("https://api.github.com/orgs/BigBrainDevBros/repos?per_page=100"),
-    ]);
-    if (!userRes.ok && !orgRes.ok) return;
-    const sumStars = async (res: Response) => {
-      if (!res.ok) return 0;
-      const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
-      return repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
-    };
-    const [userTotal, orgTotal] = await Promise.all([sumStars(userRes), sumStars(orgRes)]);
-    const publicTotal = userTotal + orgTotal;
-    if (publicTotal > 0) {
-      el.textContent = `${publicTotal} total stars`;
-    }
-  } catch {
-    // Keep initial fallback count when offline or rate-limited
   }
 }
 
@@ -280,7 +248,7 @@ function renderHubInteractive(): void {
         <button type="button" class="btn btn-primary" id="random-match-btn">Random Match</button>
       </div>
       <p style="margin:0;color:var(--text-muted);font-size:0.9rem;">
-        Zero-backend browser games running at 60fps in your tab. Launch <strong>RenYing</strong> for 1v1 WebRTC martial-arts duels or <strong>FaceOff</strong> for 5v5 tactical defusal.
+        Play <strong>RenYing</strong> for martial arts, <strong>FaceOff</strong> for first-to-nine arena duels, or <strong>VANTAGE</strong> for a city match against bots.
       </p>
     `;
     return;
@@ -583,18 +551,14 @@ function renderApp(): void {
         <div class="stats-header-row">
           <div>
             <h2 class="section-title">GitHub Star History &amp; Activity</h2>
-            <p class="section-subtitle">Combined star growth across all repositories and personal contribution hexagon graph.</p>
+            <p class="section-subtitle">Current stars across public AMFI-Disable and BigBrainDevBros repositories, alongside personal contribution activity.</p>
           </div>
-          <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noopener noreferrer">
-            <span>&#9733;</span>
-            <span id="total-stars-count">107 total stars</span>
-          </a>
         </div>
         <div class="stats-grid">
           <div class="graph-card">
-            <h3>Combined Star History (All Repositories)</h3>
-            <a href="https://www.star-history.com/?type=date&repos=${ALL_REPOS_ENCODED}" target="_blank" rel="noopener noreferrer">
-              <img id="star-history-img" alt="AMFI-Disable Combined Star History Chart" loading="lazy" />
+            <h3>Combined Star History</h3>
+            <a href="https://github.com/AMFI-Disable/AMFI-Disable#github-star-history--activity" target="_blank" rel="noopener noreferrer">
+              <img src="https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/star-history.svg" alt="Combined public star history with totals for AMFI-Disable and BigBrainDevBros" loading="lazy" />
             </a>
           </div>
           <div class="graph-card">
@@ -702,7 +666,6 @@ function renderApp(): void {
   `;
 
   applyTheme(getInitialTheme());
-  void refreshTotalStars();
   updateExplorerStamp();
 
   const initialHash = window.location.hash.replace("#", "") as HubId;

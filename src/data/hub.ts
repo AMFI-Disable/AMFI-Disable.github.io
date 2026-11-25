@@ -196,13 +196,26 @@ export const HUB_CONFIG = {
       hub: "arcade",
       name: "FaceOff",
       category: "Browser Games",
-      tagline: "Browser-native 5v5 bomb defusal on de_dust2",
+      tagline: "First-to-nine arena duels",
       description:
-        "Static-site 3D tactical shooter built with Three.js featuring MR12 competitive rules, CS2-style economy, buy menu, spray patterns, wallbangs, and four bot tiers.",
+        "Choose one of four arenas and a bot difficulty for timed one-on-one rounds. The final 20 seconds reveal player positions.",
       stack: ["JavaScript", "Three.js", "WebGL 2"],
       repoUrl: "https://github.com/BigBrainDevBros/FaceOff",
       liveUrl: "https://bigbraindevbros.github.io/FaceOff/",
       featured: true,
+      status: "Playable",
+    },
+    {
+      id: "vantage",
+      hub: "arcade",
+      name: "VANTAGE",
+      category: "Browser Games",
+      tagline: "Procedural city shooter by HilbertQiu",
+      description:
+        "Explore a city in this standalone browser game by HilbertQiu. Choose the map and its size, then start a solo match with bots.",
+      stack: ["Three.js", "PeerJS"],
+      repoUrl: "https://github.com/BigBrainDevBros/VANTAGE",
+      liveUrl: "https://bigbraindevbros.github.io/VANTAGE/",
       status: "Playable",
     },
     {
