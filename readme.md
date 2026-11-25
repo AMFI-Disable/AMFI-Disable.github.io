@@ -45,7 +45,8 @@ Personal developer hub and portfolio website for **AMFI-Disable**, built with **
 ├── .github/workflows/deploy.yml  # GitHub Actions build & Pages deployment
 ├── public/
 │   ├── .nojekyll                 # Bypasses Jekyll processing on GitHub Pages
-│   └── favicon.svg               # Site icon
+│   ├── favicon.jpg
+│   └── manifest.webmanifest               # Site icon
 ├── src/
 │   ├── data/hub.ts               # Editable profile, projects, and links data
 │   ├── styles/main.css           # Theme tokens, layout, and component styles
