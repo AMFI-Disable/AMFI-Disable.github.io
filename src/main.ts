@@ -362,6 +362,13 @@ function renderProjectCard(project: ProjectItem): string {
     ? `<button type="button" class="card-copy-btn" data-copy="${escapeHtml(project.installCmd)}" title="Copy Homebrew install command">${getIcon("copy")} brew install</button>`
     : "";
 
+  const orgBadge = project.org
+    ? `<span class="badge badge-team">${escapeHtml(project.org)}</span>`
+    : "";
+  const versionBadge = project.version
+    ? `<span class="badge badge-version">${escapeHtml(project.version)}</span>`
+    : "";
+
   return `
     <article class="card">
       <div class="card-top">
@@ -369,7 +376,11 @@ function renderProjectCard(project: ProjectItem): string {
           <h3 class="card-title">${escapeHtml(project.name)}</h3>
           <p class="card-tagline">${escapeHtml(project.tagline)}</p>
         </div>
-        <span class="${statusBadgeClass(project.status)}">${escapeHtml(project.status)}</span>
+        <div class="card-badges">
+          ${orgBadge}
+          ${versionBadge}
+          <span class="${statusBadgeClass(project.status)}">${escapeHtml(project.status)}</span>
+        </div>
       </div>
       <p class="card-desc">${escapeHtml(project.description)}</p>
       <div class="tag-list">${tags}</div>
@@ -399,6 +410,8 @@ function renderFilteredProjects(): void {
       project.tagline,
       project.description,
       project.category,
+      project.org ?? "",
+      project.version ?? "",
       ...project.stack,
     ]
       .join(" ")

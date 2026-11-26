@@ -27,6 +27,8 @@ export interface ProjectItem {
   liveUrl?: string;
   installCmd?: string;
   featured?: boolean;
+  org?: string;
+  version?: string;
   status: "Active" | "Playable" | "Completed";
 }
 
@@ -146,6 +148,7 @@ export const HUB_CONFIG = {
       liveUrl: "https://amfi-disable.github.io/Juicer/",
       installCmd: "brew install --cask AMFI-Disable/tap/juicer",
       featured: true,
+      version: "v1.1.3",
       status: "Active",
     },
     {
@@ -161,6 +164,7 @@ export const HUB_CONFIG = {
       liveUrl: "https://amfi-disable.github.io/BrewStore/",
       installCmd: "brew install --cask AMFI-Disable/tap/brewstore",
       featured: true,
+      version: "v1.0.0",
       status: "Active",
     },
     {
@@ -175,6 +179,7 @@ export const HUB_CONFIG = {
       repoUrl: "https://github.com/AMFI-Disable/PathDeck",
       liveUrl: "https://amfi-disable.github.io/PathDeck/",
       featured: false,
+      version: "v1.0.1",
       status: "Active",
     },
     {
@@ -184,11 +189,13 @@ export const HUB_CONFIG = {
       category: "Browser Games",
       tagline: "Ink-wash martial-arts duel with WebRTC P2P",
       description:
-        "Fast-paced 1v1 browser fighting game featuring 36 heroes, custom HTML5 Canvas rendering, serverless WebRTC peer-to-peer netplay, and an optional Cloudflare Worker backend.",
+        "Fast-paced 1v1 browser fighting game featuring 20 heroes, custom HTML5 Canvas rendering, serverless WebRTC peer-to-peer netplay, and an optional Cloudflare Worker backend.",
       stack: ["JavaScript", "HTML5 Canvas", "WebRTC", "Cloudflare Workers"],
       repoUrl: "https://github.com/BigBrainDevBros/RenYing",
       liveUrl: "https://bigbraindevbros.github.io/RenYing/",
       featured: true,
+      org: "BigBrainDevBros",
+      version: "v1.0.12",
       status: "Playable",
     },
     {
@@ -203,6 +210,8 @@ export const HUB_CONFIG = {
       repoUrl: "https://github.com/BigBrainDevBros/FaceOff",
       liveUrl: "https://bigbraindevbros.github.io/FaceOff/",
       featured: true,
+      org: "BigBrainDevBros",
+      version: "v1.0.0",
       status: "Playable",
     },
     {
@@ -216,6 +225,8 @@ export const HUB_CONFIG = {
       stack: ["Three.js", "PeerJS"],
       repoUrl: "https://github.com/BigBrainDevBros/VANTAGE",
       liveUrl: "https://bigbraindevbros.github.io/VANTAGE/",
+      org: "BigBrainDevBros",
+      version: "v0.1.0",
       status: "Playable",
     },
     {
@@ -230,6 +241,7 @@ export const HUB_CONFIG = {
       repoUrl: "https://github.com/AMFI-Disable/GeoFS_Extension",
       liveUrl: "https://amfi-disable.github.io/GeoFS_Extension/",
       featured: true,
+      version: "v0.3.0",
       status: "Active",
     },
     {
@@ -244,6 +256,7 @@ export const HUB_CONFIG = {
       repoUrl: "https://github.com/AMFI-Disable/Lichess-AutoPlayer",
       liveUrl: "https://amfi-disable.github.io/Lichess-AutoPlayer/practice.html",
       featured: false,
+      version: "v1.0.2",
       status: "Active",
     },
     {
@@ -258,6 +271,7 @@ export const HUB_CONFIG = {
       repoUrl: "https://github.com/AMFI-Disable/GimSell_Gimkit-Seller",
       liveUrl: "https://amfi-disable.github.io/GimSell_Gimkit-Seller/",
       featured: false,
+      version: "v1.2.0",
       status: "Completed",
     },
     {
