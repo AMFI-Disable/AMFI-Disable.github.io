@@ -8,6 +8,8 @@ All notable changes, features, and fixes for this project are documented in this
 
 ### Changed
 
+- Use the dated public inventory shared with the profile for star counts and chart scope. Link directly to premove practice and describe GimSell’s inventory preview.
+
 - Display the same dated public star history as the profile, with separate owner totals. Added VANTAGE with creator credit and updated FaceOff’s arena description.
 - Restored the Star History chart section in `readme.md` and `src/main.ts`, replacing the embedded contribution hexagon block.
 - Standardized documentation filenames (`readme.md`, `license`), security policy (`security.md`), `.gitignore` layout, and `.github/` templates.

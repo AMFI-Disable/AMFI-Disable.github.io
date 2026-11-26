@@ -87,14 +87,13 @@ async function copyText(text: string): Promise<void> {
 
 const colorSchemeMedia = window.matchMedia("(prefers-color-scheme: light)");
 
-const ALL_REPOS_ENCODED =
-  "amfi-disable%2Famfi-disable%2Camfi-disable%2Famfi-disable.github.io%2Camfi-disable%2Fbrew-ghost%2Camfi-disable%2Fbrewstore%2Camfi-disable%2Ffmg_free-mapgenie%2Camfi-disable%2Fgeofs_extension%2Camfi-disable%2Fgeofs_liveryselector%2Camfi-disable%2Fgimsell_gimkit-seller%2Camfi-disable%2Fhomebrew-brewstore%2Camfi-disable%2Fhomebrew-juicer%2Camfi-disable%2Fhomebrew-tap%2Camfi-disable%2Fjuicer%2Camfi-disable%2Flichess-autoplayer%2Camfi-disable%2Fomnisuite%2Camfi-disable%2Fpathdeck%2Camfi-disable%2Ftorntools%2Cbigbraindevbros%2F.github%2Cbigbraindevbros%2Ffaceoff%2Cbigbraindevbros%2Frenying%2Cbigbraindevbros%2Fvantage";
+let starHistoryRepos = "";
 
 function updateThemedGraphs(theme: "dark" | "light"): void {
   const starImg = document.getElementById("star-history-img") as HTMLImageElement | null;
-  if (starImg) {
+  if (starImg && starHistoryRepos) {
     const themeParam = theme === "dark" ? "&theme=dark" : "";
-    starImg.src = `https://api.star-history.com/chart?repos=${ALL_REPOS_ENCODED}&type=date${themeParam}&legend=top-left`;
+    starImg.src = `https://api.star-history.com/chart?repos=${starHistoryRepos}&type=date${themeParam}&legend=top-left`;
   }
   const hexImg = document.getElementById("hexagon-graph-img") as HTMLImageElement | null;
   if (hexImg) {
@@ -103,26 +102,27 @@ function updateThemedGraphs(theme: "dark" | "light"): void {
 }
 
 async function refreshTotalStars(): Promise<void> {
-  const el = document.getElementById("total-stars-count");
-  if (!el) return;
+  const count = document.getElementById("total-stars-count");
+  const link = document.querySelector<HTMLAnchorElement>("#star-history-link");
+  const image = document.querySelector<HTMLImageElement>("#star-history-img");
+  if (!count || !link || !image) return;
   try {
-    const [userRes, orgRes] = await Promise.all([
-      fetch("https://api.github.com/users/AMFI-Disable/repos?per_page=100"),
-      fetch("https://api.github.com/orgs/BigBrainDevBros/repos?per_page=100"),
-    ]);
-    if (!userRes.ok && !orgRes.ok) return;
-    const sumStars = async (res: Response) => {
-      if (!res.ok) return 0;
-      const repos = (await res.json()) as Array<{ stargazers_count?: number }>;
-      return repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
-    };
-    const [userTotal, orgTotal] = await Promise.all([sumStars(userRes), sumStars(orgRes)]);
-    const publicTotal = userTotal + orgTotal;
-    if (publicTotal > 0) {
-      el.textContent = `${publicTotal} total stars`;
+    const response = await fetch("https://raw.githubusercontent.com/AMFI-Disable/AMFI-Disable/main/assets/public-stars.json");
+    if (!response.ok) throw new Error("Snapshot unavailable");
+    const snapshot = await response.json();
+    const entries = Object.entries(snapshot.repos) as [string, number][];
+    if (!entries.length || !entries.every(([, n]) => Number.isSafeInteger(n) && n >= 0)) {
+      throw new Error("Invalid star counts");
     }
+    const total = entries.reduce((sum, [, n]) => sum + n, 0);
+    count.textContent = `${total} public stars · ${snapshot.date} UTC`;
+    starHistoryRepos = encodeURIComponent(entries.map(([name]) => name).join(","));
+    link.href = `https://www.star-history.com/?type=date&repos=${starHistoryRepos}`;
+    image.addEventListener("error", () => { image.hidden = true; });
+    image.addEventListener("load", () => { image.hidden = false; });
+    updateThemedGraphs(document.documentElement.dataset.theme === "light" ? "light" : "dark");
   } catch {
-    // Keep initial fallback count when offline or rate-limited
+    count.textContent = "View public star counts on GitHub";
   }
 }
 
@@ -583,18 +583,19 @@ function renderApp(): void {
         <div class="stats-header-row">
           <div>
             <h2 class="section-title">GitHub Star History &amp; Activity</h2>
-            <p class="section-subtitle">Combined star growth across all AMFI-Disable and BigBrainDevBros repositories alongside personal contribution activity.</p>
+            <p class="section-subtitle">Public repositories owned by AMFI-Disable and BigBrainDevBros, alongside personal contribution activity.</p>
           </div>
-          <a class="total-stars-pill" href="https://github.com/AMFI-Disable?tab=repositories" target="_blank" rel="noopener noreferrer">
+          <a class="total-stars-pill" href="https://github.com/AMFI-Disable/AMFI-Disable#github-star-history--activity" target="_blank" rel="noopener noreferrer">
             <span>&#9733;</span>
-            <span id="total-stars-count">111 total stars</span>
+            <span id="total-stars-count">View public star counts on GitHub</span>
           </a>
         </div>
         <div class="stats-grid">
           <div class="graph-card">
             <h3>Combined Star History (All Repositories)</h3>
-            <a href="https://www.star-history.com/?type=date&repos=${ALL_REPOS_ENCODED}" target="_blank" rel="noopener noreferrer">
-              <img id="star-history-img" alt="AMFI-Disable Combined Star History Chart" loading="lazy" />
+            <a id="star-history-link" href="https://github.com/AMFI-Disable/AMFI-Disable#github-star-history--activity" target="_blank" rel="noopener noreferrer">
+              Open star history
+              <img hidden id="star-history-img" alt="Star histories of public AMFI-Disable and BigBrainDevBros repositories" />
             </a>
           </div>
           <div class="graph-card">
