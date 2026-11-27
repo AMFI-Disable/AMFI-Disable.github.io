@@ -702,7 +702,7 @@ function renderApp(): void {
 
     <footer class="container site-footer">
       <span>&copy; ${new Date().getFullYear()} ${escapeHtml(HUB_CONFIG.brand)}. MIT Licensed.</span>
-      <span>AMFI Arcade · Studio · Hangar · Terminal</span>
+      <a lang="zh-CN" hreflang="zh-CN" href="https://github.com/AMFI-Disable/AMFI-Disable/blob/main/readme.zh-cn.md">中文项目指南</a>
     </footer>
 
     <div id="cmd-backdrop" class="cmd-backdrop" role="dialog" aria-modal="true" aria-label="Quick Launcher">

@@ -2,6 +2,8 @@
 
 # AMFI-Disable.github.io
 
+[中文文档](readme.zh-cn.md) · [Contributing](contributing.md)
+
 **Personal Developer Hub And Portfolio Site For AMFI-Disable**
 
 ![Platform](https://img.shields.io/badge/Platform-GitHub%20Pages-blue?style=flat-square)

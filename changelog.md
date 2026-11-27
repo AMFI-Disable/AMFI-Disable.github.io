@@ -6,6 +6,11 @@ All notable changes, features, and fixes for this project are documented in this
 
 ## [Unreleased]
 
+### Documentation
+
+- Added Simplified Chinese project and contribution guides and bilingual feedback templates.
+
+
 ### Changed
 
 - Use the dated public inventory shared with the profile for star counts and chart scope. Link directly to premove practice and describe GimSell’s inventory preview.
